@@ -6,7 +6,7 @@ import App from '../App';
 describe('App Component Unit Tests', () => {
   test('renders welcomes heading', () => {
     render(<App />);
-    const headingElement = screen.getByText('Digitap Learning Portal');
+    const headingElement = screen.getByText('Digitap Learning');
     expect(headingElement).toBeInTheDocument();
   });
 

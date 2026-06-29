@@ -46,14 +46,15 @@ describe('ProgressContext Offline Sync Engine', () => {
     const wrapper = ({ children }) => <ProgressProvider>{children}</ProgressProvider>;
     const { result } = renderHook(() => useProgress(), { wrapper });
 
-    // Wait for context load
+    // Wait for context load (100ms for async settling)
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise(resolve => setTimeout(resolve, 100));
     });
 
     // Save watch progress while offline
     await act(async () => {
       await result.current.saveWatchProgress('mod1', 50, 120);
+      await new Promise(resolve => setTimeout(resolve, 50));
     });
 
     // Verify progress didn't write to sheetsService
@@ -80,7 +81,7 @@ describe('ProgressContext Offline Sync Engine', () => {
     const { result } = renderHook(() => useProgress(), { wrapper });
 
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise(resolve => setTimeout(resolve, 100));
     });
 
     // Verify queue count matches
@@ -91,7 +92,7 @@ describe('ProgressContext Offline Sync Engine', () => {
     
     await act(async () => {
       window.dispatchEvent(new Event('online'));
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise(resolve => setTimeout(resolve, 150)); // Allow time for mock sync calls and loadContentAndProgress ticks
     });
 
     // Verify it was sent to Sheets

@@ -36,14 +36,18 @@ describe('useYouTubePlayer Scrubber Lock Hook', () => {
   });
 
   test('initializes player state correctly', async () => {
-    const { result } = renderHook(() => useYouTubePlayer('dQw4w9WgXcQ', 10));
+    const { result, rerender } = renderHook(() => useYouTubePlayer('dQw4w9WgXcQ', 10));
 
     expect(result.current.isReady).toBe(false);
     expect(result.current.maxWatchedTime).toBe(10);
 
+    // Populate containerRef and rerender to trigger setup
+    result.current.containerRef.current = document.createElement('div');
+    rerender();
+
     // Wait for async YT target hook
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise(resolve => setTimeout(resolve, 20));
     });
 
     expect(result.current.isReady).toBe(true);
@@ -51,11 +55,14 @@ describe('useYouTubePlayer Scrubber Lock Hook', () => {
   });
 
   test('seekTo allows backward seeking', async () => {
-    const { result } = renderHook(() => useYouTubePlayer('dQw4w9WgXcQ', 150));
+    const { result, rerender } = renderHook(() => useYouTubePlayer('dQw4w9WgXcQ', 150));
+
+    result.current.containerRef.current = document.createElement('div');
+    rerender();
 
     // Wait for player ready
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise(resolve => setTimeout(resolve, 20));
     });
 
     // Mock current watched boundary is 150
@@ -68,10 +75,13 @@ describe('useYouTubePlayer Scrubber Lock Hook', () => {
   });
 
   test('seekTo restricts forward seeking exceeding watch boundary', async () => {
-    const { result } = renderHook(() => useYouTubePlayer('dQw4w9WgXcQ', 50));
+    const { result, rerender } = renderHook(() => useYouTubePlayer('dQw4w9WgXcQ', 50));
+
+    result.current.containerRef.current = document.createElement('div');
+    rerender();
 
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise(resolve => setTimeout(resolve, 20));
     });
 
     // Attempt to seek forward to 300, when max watched boundary is 50
