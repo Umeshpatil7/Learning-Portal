@@ -37,6 +37,12 @@ export function useYouTubePlayer(videoId, initialPosition = 0) {
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
   }, []);
 
+  // Store initialPosition in a ref to avoid re-initializing player when progress updates in sheets
+  const startPositionRef = useRef(initialPosition);
+  useEffect(() => {
+    startPositionRef.current = initialPosition;
+  }, [videoId]);
+
   // Initialize Player when script is ready and video changes
   useEffect(() => {
     if (!videoId) return;
@@ -45,8 +51,8 @@ export function useYouTubePlayer(videoId, initialPosition = 0) {
     setPlayerState(-1);
     
     // Reset watch tracking boundary for a new video
-    maxWatchedRef.current = initialPosition;
-    setMaxWatchedTime(initialPosition);
+    maxWatchedRef.current = startPositionRef.current;
+    setMaxWatchedTime(startPositionRef.current);
 
     let checkYTApiInterval;
 
@@ -76,8 +82,8 @@ export function useYouTubePlayer(videoId, initialPosition = 0) {
           onReady: (event) => {
             setIsReady(true);
             setDuration(event.target.getDuration());
-            if (initialPosition > 0) {
-              event.target.seekTo(initialPosition, true);
+            if (startPositionRef.current > 0) {
+              event.target.seekTo(startPositionRef.current, true);
             }
           },
           onStateChange: (event) => {
@@ -106,7 +112,7 @@ export function useYouTubePlayer(videoId, initialPosition = 0) {
     return () => {
       if (checkYTApiInterval) clearInterval(checkYTApiInterval);
     };
-  }, [videoId, initialPosition]);
+  }, [videoId]);
 
   // Periodic Scrubber Check & Progress Watcher (250ms Polling when PLAYING)
   useEffect(() => {

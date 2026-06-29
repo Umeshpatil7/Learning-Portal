@@ -13,28 +13,40 @@ import { useEffect, useRef } from 'react';
  */
 export function useWatchTracker(moduleId, maxWatchedTime, duration, playerState, saveWatchProgress) {
   const lastSyncedTimeRef = useRef(0);
+  const maxWatchedTimeRef = useRef(maxWatchedTime);
+  const durationRef = useRef(duration);
   const moduleIdRef = useRef(moduleId);
 
-  // Sync ref to avoid re-triggering effect on every boundary shift
+  // Sync refs to avoid re-triggering effect on every boundary shift
   useEffect(() => {
     moduleIdRef.current = moduleId;
   }, [moduleId]);
 
+  useEffect(() => {
+    maxWatchedTimeRef.current = maxWatchedTime;
+  }, [maxWatchedTime]);
+
+  useEffect(() => {
+    durationRef.current = duration;
+  }, [duration]);
+
   // Sync handler
-  const flushProgress = useEffect(() => {
+  useEffect(() => {
     const sync = () => {
       const currentModuleId = moduleIdRef.current;
-      if (!currentModuleId || duration <= 0) return;
+      const currentDuration = durationRef.current;
+      const currentMaxWatched = maxWatchedTimeRef.current;
+      if (!currentModuleId || currentDuration <= 0) return;
 
-      const watchPercent = Math.min((maxWatchedTime / duration) * 100, 100);
+      const watchPercent = Math.min((currentMaxWatched / currentDuration) * 100, 100);
       
       // Prevent redundant syncing of the same second value
-      if (Math.abs(maxWatchedTime - lastSyncedTimeRef.current) < 2 && watchPercent < 100) {
+      if (Math.abs(currentMaxWatched - lastSyncedTimeRef.current) < 2 && watchPercent < 100) {
         return;
       }
 
-      saveWatchProgress(currentModuleId, watchPercent, maxWatchedTime);
-      lastSyncedTimeRef.current = maxWatchedTime;
+      saveWatchProgress(currentModuleId, watchPercent, currentMaxWatched);
+      lastSyncedTimeRef.current = currentMaxWatched;
     };
 
     // 1. Setup 30-second interval sync while PLAYING (state === 1)
@@ -53,7 +65,7 @@ export function useWatchTracker(moduleId, maxWatchedTime, duration, playerState,
       // Flush progress on cleanup (e.g. navigation or page close)
       sync();
     };
-  }, [playerState, maxWatchedTime, duration, saveWatchProgress]);
+  }, [playerState, saveWatchProgress]);
 }
 
 export default useWatchTracker;
