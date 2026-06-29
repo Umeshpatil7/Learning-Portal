@@ -4,10 +4,13 @@ import { renderHook, act } from '@testing-library/react';
 import { ProgressProvider, useProgress } from '../../contexts/ProgressContext';
 import * as sheetsService from '../../services/sheetsService';
 
+// Define mock user as a stable constant outside the mock factory
+const mockUser = { googleId: 'user_offline_123', email: 'test@digitap.ai', role: 'student' };
+
 // Mock auth context dependency
 vi.mock('../../contexts/AuthContext', () => ({
   useAuth: () => ({
-    user: { googleId: 'user_offline_123', email: 'test@digitap.ai', role: 'student' }
+    user: mockUser
   })
 }));
 
