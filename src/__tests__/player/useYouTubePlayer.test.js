@@ -3,7 +3,7 @@ import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { render, waitFor, act } from '@testing-library/react';
 import useYouTubePlayer from '../../hooks/useYouTubePlayer';
 
-// Helper test component to render a div and bind the ref on mount
+// Helper test component using plain React.createElement to support raw .js compilation
 function PlayerTestComponent({ videoId, initialPosition, onPlayerState }) {
   const player = useYouTubePlayer(videoId, initialPosition);
 
@@ -11,7 +11,7 @@ function PlayerTestComponent({ videoId, initialPosition, onPlayerState }) {
     onPlayerState(player);
   }, [player.isReady, player.currentTime, player.maxWatchedTime, player.playerState]);
 
-  return <div ref={player.containerRef} />;
+  return React.createElement('div', { ref: player.containerRef });
 }
 
 describe('useYouTubePlayer Scrubber Lock Hook', () => {
@@ -51,13 +51,13 @@ describe('useYouTubePlayer Scrubber Lock Hook', () => {
     let latestState = null;
     
     render(
-      <PlayerTestComponent
-        videoId="dQw4w9WgXcQ"
-        initialPosition={10}
-        onPlayerState={(state) => {
+      React.createElement(PlayerTestComponent, {
+        videoId: 'dQw4w9WgXcQ',
+        initialPosition: 10,
+        onPlayerState: (state) => {
           latestState = state;
-        }}
-      />
+        }
+      })
     );
 
     // Wait for the hook to be ready
@@ -74,13 +74,13 @@ describe('useYouTubePlayer Scrubber Lock Hook', () => {
     let latestState = null;
 
     render(
-      <PlayerTestComponent
-        videoId="dQw4w9WgXcQ"
-        initialPosition={150}
-        onPlayerState={(state) => {
+      React.createElement(PlayerTestComponent, {
+        videoId: 'dQw4w9WgXcQ',
+        initialPosition: 150,
+        onPlayerState: (state) => {
           latestState = state;
-        }}
-      />
+        }
+      })
     );
 
     await waitFor(() => {
@@ -100,13 +100,13 @@ describe('useYouTubePlayer Scrubber Lock Hook', () => {
     let latestState = null;
 
     render(
-      <PlayerTestComponent
-        videoId="dQw4w9WgXcQ"
-        initialPosition={50}
-        onPlayerState={(state) => {
+      React.createElement(PlayerTestComponent, {
+        videoId: 'dQw4w9WgXcQ',
+        initialPosition: 50,
+        onPlayerState: (state) => {
           latestState = state;
-        }}
-      />
+        }
+      })
     );
 
     await waitFor(() => {
