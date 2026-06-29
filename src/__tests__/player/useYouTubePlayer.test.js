@@ -1,6 +1,18 @@
+import React, { useEffect } from 'react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { render, waitFor, act } from '@testing-library/react';
 import useYouTubePlayer from '../../hooks/useYouTubePlayer';
+
+// Helper test component to render a div and bind the ref on mount
+function PlayerTestComponent({ videoId, initialPosition, onPlayerState }) {
+  const player = useYouTubePlayer(videoId, initialPosition);
+
+  useEffect(() => {
+    onPlayerState(player);
+  }, [player.isReady, player.currentTime, player.maxWatchedTime, player.playerState]);
+
+  return <div ref={player.containerRef} />;
+}
 
 describe('useYouTubePlayer Scrubber Lock Hook', () => {
   let mockPlayer;
@@ -36,60 +48,77 @@ describe('useYouTubePlayer Scrubber Lock Hook', () => {
   });
 
   test('initializes player state correctly', async () => {
-    const { result, rerender } = renderHook(() => useYouTubePlayer('dQw4w9WgXcQ', 10));
+    let latestState = null;
+    
+    render(
+      <PlayerTestComponent
+        videoId="dQw4w9WgXcQ"
+        initialPosition={10}
+        onPlayerState={(state) => {
+          latestState = state;
+        }}
+      />
+    );
 
-    expect(result.current.isReady).toBe(false);
-    expect(result.current.maxWatchedTime).toBe(10);
-
-    // Populate containerRef and rerender to trigger setup
-    result.current.containerRef.current = document.createElement('div');
-    rerender();
-
-    // Wait for async YT target hook
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 20));
+    // Wait for the hook to be ready
+    await waitFor(() => {
+      expect(latestState).toBeDefined();
+      expect(latestState.isReady).toBe(true);
     });
 
-    expect(result.current.isReady).toBe(true);
     expect(mockPlayer.seekTo).toHaveBeenCalledWith(10, true);
+    expect(latestState.maxWatchedTime).toBe(10);
   });
 
   test('seekTo allows backward seeking', async () => {
-    const { result, rerender } = renderHook(() => useYouTubePlayer('dQw4w9WgXcQ', 150));
+    let latestState = null;
 
-    result.current.containerRef.current = document.createElement('div');
-    rerender();
+    render(
+      <PlayerTestComponent
+        videoId="dQw4w9WgXcQ"
+        initialPosition={150}
+        onPlayerState={(state) => {
+          latestState = state;
+        }}
+      />
+    );
 
-    // Wait for player ready
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 20));
+    await waitFor(() => {
+      expect(latestState).toBeDefined();
+      expect(latestState.isReady).toBe(true);
     });
 
-    // Mock current watched boundary is 150
+    // Perform backward seek to 80
     act(() => {
-      result.current.seekTo(80);
+      latestState.seekTo(80);
     });
 
-    // Should seek to 80 successfully
     expect(mockPlayer.seekTo).toHaveBeenLastCalledWith(80, true);
   });
 
   test('seekTo restricts forward seeking exceeding watch boundary', async () => {
-    const { result, rerender } = renderHook(() => useYouTubePlayer('dQw4w9WgXcQ', 50));
+    let latestState = null;
 
-    result.current.containerRef.current = document.createElement('div');
-    rerender();
+    render(
+      <PlayerTestComponent
+        videoId="dQw4w9WgXcQ"
+        initialPosition={50}
+        onPlayerState={(state) => {
+          latestState = state;
+        }}
+      />
+    );
 
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 20));
+    await waitFor(() => {
+      expect(latestState).toBeDefined();
+      expect(latestState.isReady).toBe(true);
     });
 
-    // Attempt to seek forward to 300, when max watched boundary is 50
+    // Attempt to seek forward to 300 (exceeding maxWatchedTime of 50)
     act(() => {
-      result.current.seekTo(300);
+      latestState.seekTo(300);
     });
 
-    // Should snap user back to maxWatchedTime (50)
     expect(mockPlayer.seekTo).toHaveBeenLastCalledWith(50, true);
   });
 });
