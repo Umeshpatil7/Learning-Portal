@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getGoogleAuthUrl, parseTokenFromHash, fetchGoogleUserProfile } from '../services/authService';
 import { isAdminEmail } from '../config/adminEmails';
+import * as sheetsService from '../services/sheetsService';
 
 // Initialize context
 const AuthContext = createContext(null);
@@ -41,6 +42,19 @@ export function AuthProvider({ children }) {
             token: hashToken
           };
 
+          // Save/Register user details to Google Sheets database
+          try {
+            await sheetsService.upsertUser({
+              googleId: authenticatedUser.googleId,
+              email: authenticatedUser.email,
+              name: authenticatedUser.name,
+              picture: authenticatedUser.picture
+            });
+          } catch (sheetsErr) {
+            console.error('Failed to sync user profile to Google Sheets:', sheetsErr);
+            // Non-blocking: allow login even if Sheet sync fails (offline/loading buffer)
+          }
+
           localStorage.setItem('digitap_user', JSON.stringify(authenticatedUser));
           setUser(authenticatedUser);
           setLoading(false);
@@ -54,6 +68,14 @@ export function AuthProvider({ children }) {
           // Re-evaluate role on load in case whitelist changed
           parsedUser.role = isAdminEmail(parsedUser.email) ? 'admin' : 'learner';
           setUser(parsedUser);
+
+          // Sync profile details in the background
+          sheetsService.upsertUser({
+            googleId: parsedUser.googleId,
+            email: parsedUser.email,
+            name: parsedUser.name,
+            picture: parsedUser.picture
+          }).catch(err => console.warn('Background session profile sync failed:', err));
         }
       } catch (err) {
         console.error('Authentication check failed:', err);
