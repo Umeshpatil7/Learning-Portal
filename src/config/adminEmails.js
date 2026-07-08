@@ -6,8 +6,8 @@
 export const ADMIN_EMAILS = [
   'admin@digitap.ai',
   'umeshrandhir.patil@digitap.ai', // User email
-  'hr@digitap.ai',
-  'ecosystem@digitap.ai',
+  'giri@digitap.ai',
+  'harish.yvs@digitap.ai',
   'testadmin@digitap.ai' // Used for automated testing
 ];
 
