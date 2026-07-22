@@ -53,7 +53,21 @@ export function ProgressProvider({ children }) {
       ]);
 
       const sortedSections = (fetchedSections || []).sort((a, b) => Number(a.order) - Number(b.order));
-      const sortedModules = (fetchedModules || []).sort((a, b) => Number(a.order) - Number(b.order));
+
+      // Create a map of sectionId -> sectionOrder to sort modules globally by section sequence
+      const sectionOrderMap = {};
+      sortedSections.forEach(s => {
+        sectionOrderMap[s.id] = Number(s.order) || 0;
+      });
+
+      const sortedModules = (fetchedModules || []).sort((a, b) => {
+        const secOrderA = sectionOrderMap[a.sectionId] || 0;
+        const secOrderB = sectionOrderMap[b.sectionId] || 0;
+        if (secOrderA !== secOrderB) {
+          return secOrderA - secOrderB;
+        }
+        return Number(a.order || 0) - Number(b.order || 0);
+      });
 
       const progressMap = {};
       (fetchedProgress || []).forEach(p => {

@@ -123,7 +123,12 @@ export function ModulePage({ moduleId, onNavigate }) {
 
   // Parse config properties
   const qLimit = Number(activeModule.questionsPerAttempt) || 5;
-  const pThreshold = Number(activeModule.passThreshold) || 70;
+  
+  let pThreshold = Number(activeModule.passThreshold) || 70;
+  // Google Sheets percentage values are often read as decimals (e.g., 0.7 instead of 70, or 1 instead of 100)
+  if (pThreshold > 0 && pThreshold <= 1) {
+    pThreshold = Math.round(pThreshold * 100);
+  }
 
   return (
     <div className="flex-1 w-full max-w-4xl mx-auto px-4 py-8 space-y-8">

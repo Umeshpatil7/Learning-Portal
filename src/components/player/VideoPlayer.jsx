@@ -52,7 +52,8 @@ export function VideoPlayer({
     duration,
     maxWatchedTime,
     seekTo,
-    pause
+    pause,
+    play
   } = useYouTubePlayer(videoId, initialPosition);
 
   // Sync background progress
@@ -68,10 +69,9 @@ export function VideoPlayer({
   // Trigger Resume Prompt if there is a saved position > 2 seconds
   useEffect(() => {
     if (isReady && initialPosition > 2 && !hasUserChosenResume) {
-      pause();
       setShowResumePrompt(true);
     }
-  }, [isReady, initialPosition, hasUserChosenResume, pause]);
+  }, [isReady, initialPosition, hasUserChosenResume]);
 
   // Trigger quiz automatically when video ends (state === 0 is ended)
   useEffect(() => {
@@ -110,6 +110,10 @@ export function VideoPlayer({
     } else {
       seekTo(0, true);
     }
+    // Start playback automatically after selection
+    setTimeout(() => {
+      play();
+    }, 100);
   };
 
   return (
