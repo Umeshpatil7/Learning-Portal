@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ProgressProvider, useProgress } from './contexts/ProgressContext';
 import AuthGuard from './components/auth/AuthGuard';
@@ -16,6 +16,27 @@ function MainDashboard() {
   const { user, logout, isAdmin } = useAuth();
   const { route, params, navigate } = useHashRoute();
   const { syncStatus, pendingCount } = useProgress();
+
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('digitap_theme') || 'dark';
+  });
+
+  // Sync theme selection to document element classes
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === 'light') {
+      root.classList.remove('dark');
+      root.classList.add('light');
+    } else {
+      root.classList.remove('light');
+      root.classList.add('dark');
+    }
+    localStorage.setItem('digitap_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
 
   // Sync status badge renderer
   const renderSyncBadge = () => {
@@ -73,18 +94,37 @@ function MainDashboard() {
     <div className="min-h-screen bg-slate-950 flex flex-col font-sans">
       {/* Premium Header Navigation */}
       <header className="bg-slate-900/60 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50 px-4 sm:px-6 py-4 flex items-center justify-between">
-        <div
-          onClick={() => navigate('#/')}
-          className="flex items-center space-x-3 cursor-pointer group"
-        >
-          <div className="p-2.5 rounded-xl bg-indigo-600/10 text-indigo-500 group-hover:bg-indigo-600 group-hover:text-white transition duration-200">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-            </svg>
+        <div className="flex items-center space-x-3 sm:space-x-4">
+          <div
+            onClick={() => navigate('#/')}
+            className="flex items-center space-x-3 cursor-pointer group"
+          >
+            <div className="p-2.5 rounded-xl bg-indigo-600/10 text-indigo-500 group-hover:bg-indigo-600 group-hover:text-white transition duration-200">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+              </svg>
+            </div>
+            <span className="font-extrabold text-lg text-white tracking-tight group-hover:text-indigo-400 transition duration-200">
+              Digitap Learning
+            </span>
           </div>
-          <span className="font-extrabold text-lg text-white tracking-tight group-hover:text-indigo-400 transition duration-200">
-            Digitap Learning
-          </span>
+
+          {/* Theme Toggle Button */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-xl border border-slate-800 hover:bg-slate-800/40 text-slate-400 hover:text-indigo-500 transition duration-200"
+            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {theme === 'dark' ? (
+              <svg className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464-4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12 8.485a1 1 0 010 1.414l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464a1 1 0 10-1.414-1.414l.707.707a1 1 0 101.414-1.414l-.707-.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z" clipRule="evenodd"></path>
+              </svg>
+            ) : (
+              <svg className="w-4 h-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+              </svg>
+            )}
+          </button>
         </div>
 
         {/* User profile controls */}

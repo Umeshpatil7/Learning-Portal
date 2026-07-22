@@ -2,27 +2,96 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-350: #b8c5d6;
+  --color-slate-400: #94a3b8;
+  --color-slate-450: #7c8ba1;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-750: #293548;
+  --color-slate-800: #1e293b;
+  --color-slate-850: #172030;
+  --color-slate-900: #0f172a;
+  --color-slate-955: #0b0f19;
+  --color-slate-950: #020617;
+
+  --color-scrollbar-track: #0b0f19;
+  --color-scrollbar-thumb: #1e293b;
+  --color-scrollbar-thumb-hover: #334155;
+}
+
+html:not(.dark) {
+  --color-slate-950: #f8fafc; /* page background */
+  --color-slate-955: #f1f5f9;
+  --color-slate-900: #ffffff; /* card background */
+  --color-slate-850: #eaeff4;
+  --color-slate-800: #e2e8f0; /* borders */
+  --color-slate-750: #d6dee9;
+  --color-slate-700: #cbd5e1;
+  --color-slate-600: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-450: #5a697f;
+  --color-slate-400: #475569; /* secondary text */
+  --color-slate-350: #3e4d61;
+  --color-slate-300: #334155;
+  --color-slate-200: #1e293b;
+  --color-slate-100: #0f172a; /* primary text */
+  --color-slate-50: #020617; /* titles and dark text */
+
+  --color-scrollbar-track: #f1f5f9;
+  --color-scrollbar-thumb: #cbd5e1;
+  --color-scrollbar-thumb-hover: #94a3b8;
+}
+
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-100 font-sans;
+    @apply bg-slate-950 text-slate-100 font-sans transition-colors duration-200;
   }
 }
 
-/* Custom modern scrollbars */
+/* Light mode overrides for text elements marked as white */
+html:not(.dark) .text-white {
+  color: var(--color-slate-100) !important;
+}
+
+/* Maintain original white text for buttons, badges, and status elements on primary backgrounds */
+html:not(.dark) button .text-white,
+html:not(.dark) button.text-white,
+html:not(.dark) a.text-white,
+html:not(.dark) .bg-indigo-600 .text-white,
+html:not(.dark) .bg-indigo-600.text-white,
+html:not(.dark) .bg-emerald-600 .text-white,
+html:not(.dark) .bg-emerald-600.text-white,
+html:not(.dark) .bg-indigo-500 .text-white,
+html:not(.dark) .bg-indigo-500.text-white,
+html:not(.dark) .bg-violet-600 .text-white,
+html:not(.dark) .bg-violet-600.text-white,
+html:not(.dark) .bg-indigo-750 .text-white,
+html:not(.dark) .bg-red-600 .text-white,
+html:not(.dark) .bg-red-600.text-white {
+  color: #ffffff !important;
+}
+
+/* Custom modern scrollbars mapped to theme variables */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0b0f19;
+  background: var(--color-scrollbar-track);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: var(--color-scrollbar-thumb);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: var(--color-scrollbar-thumb-hover);
 }
