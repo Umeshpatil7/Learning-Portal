@@ -1,16 +1,20 @@
 import React from 'react';
 import { useProgress } from '../contexts/ProgressContext';
+import { useAuth } from '../contexts/AuthContext';
 
 /**
  * SectionPage displaying modules list within a section.
  * Supports locked/unlocked rendering based on sequence progress.
+ * Blocks learner access to unpublished sections.
  * 
  * @param {Object} props
  * @param {string} props.sectionId - Active section identifier
  * @param {Function} props.onNavigate - Navigation callback
  */
 export function SectionPage({ sectionId, onNavigate }) {
+  const { user } = useAuth();
   const { sections, modules, userProgress, isModuleUnlocked, loading, error, offlineMode } = useProgress();
+  const isAdmin = user?.role === 'admin';
 
   if (loading) {
     return (
@@ -21,10 +25,13 @@ export function SectionPage({ sectionId, onNavigate }) {
   }
 
   const section = sections.find(s => s.id === sectionId);
-  if (!section) {
+
+  // Block learner access to unpublished or nonexistent sections
+  if (!section || (!isAdmin && !section.published)) {
     return (
       <div className="flex-1 flex flex-col justify-center items-center py-20 bg-slate-950 text-center">
         <h3 className="text-xl font-bold text-white">Section Not Found</h3>
+        <p className="text-slate-400 text-sm mt-2 max-w-sm">This section does not exist or has been unpublished by an administrator.</p>
         <button
           onClick={() => onNavigate('#/')}
           className="mt-4 py-2 px-4 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 transition"

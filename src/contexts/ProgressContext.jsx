@@ -52,7 +52,10 @@ export function ProgressProvider({ children }) {
         sheetsService.getProgress(user.googleId)
       ]);
 
-      const sortedSections = (fetchedSections || []).sort((a, b) => Number(a.order) - Number(b.order));
+      const sortedSections = (fetchedSections || []).sort((a, b) => Number(a.order) - Number(b.order)).map(s => ({
+        ...s,
+        published: String(s.published) !== 'false' && s.published !== false
+      }));
 
       // Create a map of sectionId -> sectionOrder to sort modules globally by section sequence
       const sectionOrderMap = {};
@@ -67,7 +70,10 @@ export function ProgressProvider({ children }) {
           return secOrderA - secOrderB;
         }
         return Number(a.order || 0) - Number(b.order || 0);
-      });
+      }).map(m => ({
+        ...m,
+        published: String(m.published) !== 'false' && m.published !== false
+      }));
 
       const progressMap = {};
       (fetchedProgress || []).forEach(p => {
@@ -207,9 +213,17 @@ export function ProgressProvider({ children }) {
 
   /**
    * Helper: Check module locks.
+   * Blocks access if the parent section is unpublished (unless admin).
    */
   const isModuleUnlocked = useCallback((moduleId) => {
     if (user?.role === 'admin') return true;
+
+    // Block if parent section is unpublished
+    const targetModule = modules.find(m => m.id === moduleId);
+    if (targetModule) {
+      const parentSection = sections.find(s => s.id === targetModule.sectionId);
+      if (parentSection && !parentSection.published) return false;
+    }
 
     const moduleIndex = modules.findIndex(m => m.id === moduleId);
     if (moduleIndex <= 0) return true;
@@ -217,7 +231,7 @@ export function ProgressProvider({ children }) {
     const previousModule = modules[moduleIndex - 1];
     const prevProgress = userProgress[previousModule.id];
     return !!prevProgress?.completed;
-  }, [modules, userProgress, user]);
+  }, [modules, sections, userProgress, user]);
 
   /**
    * Saves and updates the watch percentage/position for a module.

@@ -34,7 +34,11 @@ export function HomePage({ onNavigate }) {
     );
   }
 
-  // Calculate global completed count
+  // Filter sections: learners only see published sections, admins see all
+  const isAdmin = user?.role === 'admin';
+  const visibleSections = isAdmin ? sections : sections.filter(s => s.published);
+
+  // Calculate global completed count (only published modules)
   const totalModules = modules.filter(m => m.published).length;
   const completedModules = Object.values(userProgress).filter(p => p.completed).length;
   const overallPercent = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
@@ -86,13 +90,13 @@ export function HomePage({ onNavigate }) {
           Learning Paths
         </h3>
         
-        {sections.length === 0 ? (
+        {visibleSections.length === 0 ? (
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-12 text-center text-slate-500">
             No published training sections found in the database.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {sections.map(section => {
+            {visibleSections.map(section => {
               // Filter published modules in this section
               const sectionModules = modules.filter(m => m.sectionId === section.id && m.published);
               const totalSectionMods = sectionModules.length;
