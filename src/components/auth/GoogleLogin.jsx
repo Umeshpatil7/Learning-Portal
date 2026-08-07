@@ -40,7 +40,7 @@ export function GoogleLogin() {
         <div className="pt-2">
           <button
             onClick={login}
-            className="w-full flex items-center justify-center space-x-3 py-3 px-4 rounded-xl bg-white hover:bg-slate-50 text-slate-900 font-semibold transition duration-200 shadow-xl text-sm"
+            className="w-full flex items-center justify-center space-x-3 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-100 font-semibold transition duration-200 shadow-xl text-sm"
           >
             {/* Google Logo SVG */}
             <svg className="w-5 h-5" viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
